@@ -1,0 +1,16 @@
+name: xt-target
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+permissions: read-all
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+      - run: |
+          echo REPO=${{ github.repository }}
+          cat marker.txt || true
