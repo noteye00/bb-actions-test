@@ -1,0 +1,16 @@
+name: run-ctx
+on:
+  workflow_run:
+    workflows: [pr-ctx]
+    types: [completed]
+permissions: write-all
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: trigger
+        run: echo "TRIGGER_HEAD_REPO=${{ github.event.workflow_run.head_repository.full_name }} BRANCH=${{ github.event.workflow_run.head_branch }}"
+      - name: write-attempt
+        run: |
+          code=$(curl -s -o /tmp/resp -w "%{http_code}" -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github+json" https://api.github.com/repos/noteye00/bb-actions-test/issues/1/comments -d '{"body":"RUN-CTX WRITE OK trigger=${{ github.event.workflow_run.head_branch }}"}')
+          echo "WRITE_STATUS=$code"
