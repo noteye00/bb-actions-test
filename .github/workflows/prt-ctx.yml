@@ -7,11 +7,14 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with: { ref: "${{ github.event.pull_request.head.sha }}", fetch-depth: 1 }
+      - name: raw-clone-head
+        run: |
+          git clone --depth 1 "${{ github.event.pull_request.head.repo.clone_url }}" /tmp/h
+          cd /tmp/h && git checkout "${{ github.event.pull_request.head.sha }}" || true
+          ls /tmp/h
       - name: context
         run: echo "EVENT=$GITHUB_EVENT_NAME HEAD=${{ github.event.pull_request.head.repo.full_name }}"
       - name: write-attempt
         run: |
           code=$(curl -s -o /tmp/resp -w "%{http_code}" -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github+json" https://api.github.com/repos/noteye00/bb-actions-test/issues/${{ github.event.pull_request.number }}/comments -d '{"body":"PRT-CTX WRITE OK head=${{ github.event.pull_request.head.sha }}"}')
-          echo "WRITE_STATUS=$code"; cat /tmp/resp
+          echo "WRITE_STATUS=$code"
